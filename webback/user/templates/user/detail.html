@@ -1,0 +1,40 @@
+<!-- user/templates/user/detail.html -->
+
+<h2>{{ post.title }}</h2>
+<p>{{ post.content }}</p>
+
+<a href="{% url 'edit_post' post.id %}">✏ 수정하기</a>
+
+<br><br>
+<a href="{% url 'post_list' %}">
+  <button type="button">← 목록으로 돌아가기</button>
+</a>
+
+<hr>
+<!-- ✅ 이미지가 여러 개일 수 있으니 반복문 사용 -->
+{% for image in post.images.all %}
+  <img src="{{ image.image.url }}" width="300" style="margin-bottom: 10px;"><br>
+{% endfor %}
+{% for comment in comments %}
+  <p>{{ comment.author }}: {{ comment.content }} ({{ comment.created_at }})</p>
+{% endfor %}
+
+{% if user.is_authenticated %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">댓글 작성</button>
+  </form>
+{% endif %}
+<form method="post" action="{% url 'like_post' post.id %}">
+  {% csrf_token %}
+  <button type="submit">
+    {% if user in post.likes.all %}
+      ❤️ 좋아요 취소
+    {% else %}
+      🤍 좋아요
+    {% endif %}
+    ({{ post.likes.count }})
+  </button>
+</form>
+

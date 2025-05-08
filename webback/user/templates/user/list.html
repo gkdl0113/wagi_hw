@@ -1,0 +1,14 @@
+<!-- user/templates/user/list.html -->
+
+<h1>글 목록</h1>
+<a href="{% url 'write_post' %}">+ 새 글 작성하기</a>
+<hr>
+
+{% for post in posts %}
+  <div style="margin-bottom: 10px;">
+    <!-- ✅ 제목만 출력, 클릭 시 상세페이지 이동 -->
+    <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+  </div>
+{% empty %}
+  <p>아직 작성된 글이 없습니다.</p>
+{% endfor %}

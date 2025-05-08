@@ -1,0 +1,25 @@
+<!-- user/templates/user/edit.html -->
+<h2>게시글 수정</h2>
+
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="text" name="title" value="{{ post.title }}" placeholder="제목"><br>
+  <textarea name="content">{{ post.content }}</textarea><br>
+
+  <p>📷 기존 이미지:</p>
+  {% for image in post.postimage_set.all %}
+    <div>
+      <img src="{{ image.image.url }}" width="150">
+      <label>
+        <input type="checkbox" name="delete_images" value="{{ image.id }}">
+        삭제
+      </label>
+    </div>
+  {% endfor %}
+
+  <p>📤 새 이미지 추가:</p>
+  <input type="file" name="images" multiple><br><br>
+
+  <button type="submit">수정 완료</button>
+</form>
+
