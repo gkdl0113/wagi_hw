@@ -1,14 +1,24 @@
 <!-- user/templates/user/list.html -->
 
 <h1>글 목록</h1>
+<!-- post/templates/post/post_list.html -->
+<form method="get" action="{% url 'post_list' %}">
+    <input type="text" name="q" placeholder="제목 검색" value="{{ request.GET.q }}">
+    <button type="submit">검색</button>
+</form>
+
+
+
+
 <a href="{% url 'write_post' %}">+ 새 글 작성하기</a>
 <hr>
 
-{% for post in posts %}
-  <div style="margin-bottom: 10px;">
-    <!-- ✅ 제목만 출력, 클릭 시 상세페이지 이동 -->
-    <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-  </div>
-{% empty %}
-  <p>아직 작성된 글이 없습니다.</p>
-{% endfor %}
+{% if posts %}
+    {% for post in posts %}
+        <div style="margin-bottom: 10px;">
+            <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>게시물이 없습니다.</p>
+{% endif %}

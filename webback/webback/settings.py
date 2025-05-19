@@ -33,7 +33,7 @@ ROOT_URLCONF = 'webback.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],  # 앱 내부의 templates 폴더만 쓸 거니까 비워도 됨
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

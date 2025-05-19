@@ -2,9 +2,13 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
+
 from django.http import HttpResponseForbidden
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login 
+from django.contrib.auth import login, authenticate
 from .models import Post, PostImage
 from django.shortcuts import get_object_or_404, redirect
 from .forms import CommentForm
@@ -26,15 +30,14 @@ def write_post(request):
     return render(request, 'user/write.html')
 
 # 글 목록
-@login_required
 def post_list(request):
-    posts = Post.objects.order_by('-id')
+    query = request.GET.get('q')  # ?q=검색어
+    if query:
+        posts = Post.objects.filter(title__icontains=query)
+    else:
+        posts = Post.objects.all()
     return render(request, 'user/list.html', {'posts': posts})
 
-# 글 상세
-def post_detail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    return render(request, 'user/detail.html', {'post': post})
 
 # 글 수정
 
@@ -80,6 +83,21 @@ def signup_view(request):
     else:
         form = CustomUserCreationForm()
     return render(request, 'user/signup.html', {'form': form})
+#로그인
+def custom_login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('post_list')  # 로그인 성공 시 이동할 페이지
+        else:
+            messages.error(request, '아이디 또는 비밀번호가 올바르지 않습니다.')
+
+    return render(request, 'user/login.html')
+
 #댓글
 @login_required
 def post_detail(request, post_id):
@@ -108,3 +126,7 @@ def like_post(request, post_id):
         post.likes.add(request.user)
 
     return redirect('post_detail', post_id=post.id)
+#로그아웃
+def logout_view(request):
+    logout(request)
+    return redirect('login')
