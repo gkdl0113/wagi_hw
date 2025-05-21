@@ -16,6 +16,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'user',  # ← 우리가 만든 앱
+    'post',
 ]
 
 MIDDLEWARE = [

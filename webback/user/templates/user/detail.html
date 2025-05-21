@@ -12,7 +12,7 @@
 
 <hr>
 <!-- ✅ 이미지가 여러 개일 수 있으니 반복문 사용 -->
-{% for image in post.images.all %}
+{% for image in images %}
   <img src="{{ image.image.url }}" width="300" style="margin-bottom: 10px;"><br>
 {% endfor %}
 {% for comment in comments %}

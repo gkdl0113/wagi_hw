@@ -7,7 +7,8 @@
   <textarea name="content">{{ post.content }}</textarea><br>
 
   <p>📷 기존 이미지:</p>
-  {% for image in post.postimage_set.all %}
+  {% for image in images %}
+  
     <div>
       <img src="{{ image.image.url }}" width="150">
       <label>

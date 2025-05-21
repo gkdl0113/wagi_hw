@@ -2,10 +2,8 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-
 from django.http import HttpResponseForbidden
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
@@ -15,14 +13,14 @@ from .forms import CommentForm
 
 # 글 작성
 @login_required
-def write_post(request):
-    if request.method == 'POST':
+def write_post(request):#request.method => 요청방식(get/post)
+    if request.method == 'POST': 
         title = request.POST.get('title')
         content = request.POST.get('content')
-        post = Post.objects.create(
-            title=title,
-            content=content,
-            author=request.user
+        post = Post.objects.create(#post라는 모델에 새 글 저장장
+            title=title,#왼쪽 title,content,author이 POST모델의 필드드
+            content=content,#오른쪽은 사용자가 입력
+            author=request.user #request는 사용자의 요청 정보를 담는 객체, 누가 요청했는지, 어떤방식 get.post인지 어떤 데이터 담겼는지 정보포함
         )
         for img in request.FILES.getlist('images'):
             PostImage.objects.create(post=post, image=img)
@@ -33,10 +31,10 @@ def write_post(request):
 def post_list(request):
     query = request.GET.get('q')  # ?q=검색어
     if query:
-        posts = Post.objects.filter(title__icontains=query)
+        posts = Post.objects.filter(title__icontains=query)#하늘색 POST는 DB에서 가져온 결과 저장하는 파이썬 변수
     else:
-        posts = Post.objects.all()
-    return render(request, 'user/list.html', {'posts': posts})
+        posts = Post.objects.all()#초록색 POST가 DB에서 테이블 하나를 표현, DB에서 데이터를 꺼내준다
+    return render(request, 'user/list.html', {'posts': posts})#{'posts': posts}이거는 딕셔너리고 앞은 Key(HTML 템플릿에서 사용할 별명) 뒤는 Value(Python 코드에서 만든 실제 데이터)  
 
 
 # 글 수정
@@ -67,41 +65,18 @@ def edit_post(request, post_id):
 
         # ✅ post_detail 페이지로 이동
         return redirect('post_detail', post_id=post.id)
-
-    return render(request, 'user/edit.html', {'post': post})
+    
+    images = post.images.all() #
+    return render(request, 'user/edit.html', {'post': post, 'images': images})
 
 # user/views.py
 from .forms import CustomUserCreationForm
-#회원가입
-def signup_view(request):
-    if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('login') #로그인 페이지로 이동동
-    else:
-        form = CustomUserCreationForm()
-    return render(request, 'user/signup.html', {'form': form})
-#로그인
-def custom_login(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('post_list')  # 로그인 성공 시 이동할 페이지
-        else:
-            messages.error(request, '아이디 또는 비밀번호가 올바르지 않습니다.')
-
-    return render(request, 'user/login.html')
 
 #댓글
 @login_required
 def post_detail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+    images = post.images.all()
     comments = post.comments.all()
     form = CommentForm()
 
@@ -114,11 +89,11 @@ def post_detail(request, post_id):
             comment.save()
             return redirect('post_detail', post_id=post.id)
 
-    return render(request, 'user/detail.html', {'post': post, 'comments': comments, 'form': form})
+    return render(request, 'user/detail.html', {'post': post, 'images': images, 'comments': comments, 'form': form})
 #좋아요
-@login_required
+@login_required #로그인 한 사용자만 이 함수에 접근, 비로그인 상태에서는 로그인 페이지로 감감
 def like_post(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    post = get_object_or_404(Post, id=post_id) #post_id에 해당하는 post객체를 DB에서 찾고 없으면 404에러 발생생
 
     if request.user in post.likes.all():
         post.likes.remove(request.user)
@@ -126,7 +101,3 @@ def like_post(request, post_id):
         post.likes.add(request.user)
 
     return redirect('post_detail', post_id=post.id)
-#로그아웃
-def logout_view(request):
-    logout(request)
-    return redirect('login')
