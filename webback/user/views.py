@@ -10,12 +10,14 @@ from django.contrib.auth import login, authenticate
 from .models import Post, PostImage
 from django.shortcuts import get_object_or_404, redirect
 from .forms import CommentForm
+from django.db.models import Q
+import re
 
 # 글 작성
 @login_required
 def write_post(request):#request.method => 요청방식(get/post)
     if request.method == 'POST': 
-        title = request.POST.get('title')
+        title = request.POST.get('title') #request.POST=>POST방식으로 전달된 값들만 모아둔 딕셔너리리, get.()=>파이썬 딕셔너리에서 값을 꺼내는 함수
         content = request.POST.get('content')
         post = Post.objects.create(#post라는 모델에 새 글 저장장
             title=title,#왼쪽 title,content,author이 POST모델의 필드드
@@ -28,13 +30,27 @@ def write_post(request):#request.method => 요청방식(get/post)
     return render(request, 'user/write.html')
 
 # 글 목록
+
 def post_list(request):
-    query = request.GET.get('q')  # ?q=검색어
+    query = request.GET.get('q', '').strip()
+    search_type = request.GET.get('search_type', 'all')  # 기본값 'all'
+    posts = Post.objects.all()
+
     if query:
-        posts = Post.objects.filter(title__icontains=query)#하늘색 POST는 DB에서 가져온 결과 저장하는 파이썬 변수
-    else:
-        posts = Post.objects.all()#초록색 POST가 DB에서 테이블 하나를 표현, DB에서 데이터를 꺼내준다
-    return render(request, 'user/list.html', {'posts': posts})#{'posts': posts}이거는 딕셔너리고 앞은 Key(HTML 템플릿에서 사용할 별명) 뒤는 Value(Python 코드에서 만든 실제 데이터)  
+        keywords = re.split(r'[\s,]+', query)
+
+        q = Q()
+        for word in keywords:
+            if search_type == 'title':
+                q |= Q(title__icontains=word)
+            elif search_type == 'content':
+                q |= Q(content__icontains=word)
+            else:  # 'all' 또는 아무 것도 선택하지 않았을 때
+                q |= Q(title__icontains=word) | Q(content__icontains=word)
+
+        posts = posts.filter(q)
+
+    return render(request, 'user/list.html', {'posts': posts})
 
 
 # 글 수정

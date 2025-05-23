@@ -1,6 +1,6 @@
 # user/urls.py
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include #webback의 urls.py에서 쓴 path들 가져옴
 from django.contrib.auth import views as auth_views
 from .views import like_post, write_post, post_list, post_detail, edit_post
 
